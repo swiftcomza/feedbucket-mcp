@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Purpose: MCP server implementation for Feedbucket API integration
  * Dependencies: @modelcontextprotocol/sdk

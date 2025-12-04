@@ -1,20 +1,45 @@
 {
   "name": "feedbucket-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Feedbucket API integration",
+  "description": "MCP server for managing Feedbucket website feedback in Claude Code and Cursor",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "feedbucket-mcp": "./dist/index.js",
+    "feedbucket-setup": "./dist/setup.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc && node scripts/bundle.js",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
-    "setup": "tsx scripts/setup.ts",
+    "setup": "tsx src/setup.ts",
     "lint": "eslint src/**/*.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "feedbucket", "feedback", "api"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "feedbucket",
+    "feedback",
+    "claude",
+    "cursor",
+    "ai-assistant"
+  ],
   "author": "SwiftCom",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swiftcomza/feedbucket-mcp.git"
+  },
+  "homepage": "https://github.com/swiftcomza/feedbucket-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/swiftcomza/feedbucket-mcp/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   },

@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env node
 /**
  * Purpose: Auto-setup script for Feedbucket MCP
  * Extracts credentials from a website with Feedbucket installed and configures Claude Code/Cursor
@@ -177,9 +177,13 @@ async function fetchWebsiteFeedbucketData(websiteUrl: string): Promise<{ project
     projectIdMatch = html.match(/feedbucket[\s\S]{0,150}?["']([a-zA-Z0-9]{20})["']/);
   }
 
-  if (projectIdMatch) {
+  if (projectIdMatch && projectIdMatch[1]) {
     logSuccess(`Found project ID in page HTML`);
-    return { projectId: projectIdMatch[1], apiKey };
+    const result: { projectId: string; apiKey?: string } = { projectId: projectIdMatch[1] };
+    if (apiKey) {
+      result.apiKey = apiKey;
+    }
+    return result;
   }
 
   // If not found in HTML, it's likely loaded dynamically (Next.js, etc.)
@@ -232,13 +236,16 @@ async function fetchFeedbucketCredentials(projectId: string, apiKey?: string): P
     throw new Error('Could not retrieve private key from Feedbucket API. The project may have restricted access.');
   }
 
-  return {
+  const result: FeedbucketCredentials = {
     projectId,
     privateKey: data.project.private_key,
-    apiKey,
     projectName: data.project.name,
     websiteUrl: data.project.url,
   };
+  if (apiKey) {
+    result.apiKey = apiKey;
+  }
+  return result;
 }
 
 function getClaudeConfigPath(scope: 'project' | 'user'): string {
@@ -399,9 +406,7 @@ function parseArgs(args: string[]): ParsedArgs {
 
   const positionalArgs: string[] = [];
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-
+  for (const arg of args) {
     if (arg === '--help' || arg === '-h') {
       result.showHelp = true;
     } else if (arg === '--extract') {
@@ -425,13 +430,15 @@ function parseArgs(args: string[]): ParsedArgs {
   }
 
   // First positional arg is the website URL
-  if (positionalArgs.length >= 1) {
-    result.websiteUrl = positionalArgs[0];
+  const firstArg = positionalArgs[0];
+  if (firstArg) {
+    result.websiteUrl = firstArg;
   }
 
   // Second positional arg is the feedbucket secret
-  if (positionalArgs.length >= 2) {
-    result.feedbucketSecret = positionalArgs[1];
+  const secondArg = positionalArgs[1];
+  if (secondArg) {
+    result.feedbucketSecret = secondArg;
   }
 
   return result;
@@ -468,10 +475,11 @@ ${colors.cyan}Let's set up Feedbucket MCP for your project.${colors.reset}
 
   const secret = await prompt(`${colors.bright}Enter your Feedbucket secret (press Enter if public): ${colors.reset}`);
 
-  return {
-    websiteUrl,
-    feedbucketSecret: secret || undefined,
-  };
+  const result: { websiteUrl: string; feedbucketSecret?: string } = { websiteUrl };
+  if (secret) {
+    result.feedbucketSecret = secret;
+  }
+  return result;
 }
 
 async function interactiveFallback(): Promise<{ projectId: string; apiKey?: string }> {
