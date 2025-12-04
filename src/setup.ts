@@ -248,15 +248,6 @@ async function fetchFeedbucketCredentials(projectId: string, apiKey?: string): P
   return result;
 }
 
-function getClaudeConfigPath(scope: 'project' | 'user'): string {
-  if (scope === 'project') {
-    return join(process.cwd(), '.mcp.json');
-  }
-  // User scope - Claude Code stores config in ~/.claude/
-  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
-  return join(homeDir, '.claude', 'mcp.json');
-}
-
 function getCursorConfigPath(): string {
   // Cursor stores MCP config in .cursor/mcp.json at project level
   return join(process.cwd(), '.cursor', 'mcp.json');
@@ -273,54 +264,39 @@ interface McpConfig {
   mcpServers?: Record<string, McpServerConfig>;
 }
 
-function configureClaudeCode(credentials: FeedbucketCredentials, scope: 'project' | 'user'): void {
-  const configPath = getClaudeConfigPath(scope);
-  const configDir = dirname(configPath);
-
-  // Ensure directory exists
-  if (!existsSync(configDir)) {
-    mkdirSync(configDir, { recursive: true });
-  }
-
-  // Read existing config or create new
-  let config: McpConfig = {};
-  if (existsSync(configPath)) {
-    try {
-      config = JSON.parse(readFileSync(configPath, 'utf-8')) as McpConfig;
-    } catch {
-      logWarning(`Could not parse existing config at ${configPath}, creating new one`);
-    }
-  }
-
-  // Initialize mcpServers if needed
-  if (!config.mcpServers) {
-    config.mcpServers = {};
-  }
-
+function configureClaudeCode(credentials: FeedbucketCredentials): void {
   // Create a safe server name from project name
   const serverName = `feedbucket-${credentials.projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}`;
+  const distPath = join(projectRoot, 'dist', 'index.js');
 
-  // Build the MCP server config for Claude Code (requires type: stdio)
-  const serverConfig: McpServerConfig = {
-    type: 'stdio',
-    command: 'node',
-    args: [join(projectRoot, 'dist', 'index.js')],
-    env: {
-      FEEDBUCKET_PROJECT_ID: credentials.projectId,
-      FEEDBUCKET_PRIVATE_KEY: credentials.privateKey,
-    },
-  };
-
+  // Build the claude mcp add command
+  // Using -s local to scope it to the current project (stored in ~/.claude.json)
+  // This is more reliable than -s project which uses .mcp.json
+  let cmd = `claude mcp add ${serverName} -s local`;
+  cmd += ` -e FEEDBUCKET_PROJECT_ID="${credentials.projectId}"`;
+  cmd += ` -e FEEDBUCKET_PRIVATE_KEY="${credentials.privateKey}"`;
   if (credentials.apiKey) {
-    serverConfig.env!.FEEDBUCKET_API_KEY = credentials.apiKey;
+    cmd += ` -e FEEDBUCKET_API_KEY="${credentials.apiKey}"`;
   }
+  cmd += ` -- node "${distPath}"`;
 
-  config.mcpServers[serverName] = serverConfig;
+  try {
+    // First try to remove existing server with same name (ignore errors)
+    try {
+      execSync(`claude mcp remove ${serverName}`, { stdio: 'ignore' });
+    } catch {
+      // Server didn't exist, that's fine
+    }
 
-  // Write config
-  writeFileSync(configPath, JSON.stringify(config, null, 2));
-  logSuccess(`Claude Code configured at ${configPath}`);
-  log(`  Server name: ${serverName}`);
+    // Add the server using claude CLI
+    execSync(cmd, { stdio: 'inherit' });
+    logSuccess(`Claude Code configured`);
+    log(`  Server name: ${serverName}`);
+  } catch (error) {
+    logError('Failed to configure Claude Code via CLI');
+    log('  Run this command manually:');
+    log(`  ${cmd}`);
+  }
 }
 
 function configureCursor(credentials: FeedbucketCredentials): void {
@@ -439,7 +415,6 @@ interface ParsedArgs {
   extractOnly: boolean;
   configureClaude: boolean;
   configureCursor: boolean;
-  scope: 'project' | 'user';
 }
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -448,7 +423,6 @@ function parseArgs(args: string[]): ParsedArgs {
     extractOnly: false,
     configureClaude: true,
     configureCursor: true,
-    scope: 'project',
   };
 
   const positionalArgs: string[] = [];
@@ -467,10 +441,6 @@ function parseArgs(args: string[]): ParsedArgs {
     } else if (arg === '--both') {
       result.configureClaude = true;
       result.configureCursor = true;
-    } else if (arg === '--project-scope') {
-      result.scope = 'project';
-    } else if (arg === '--user-scope') {
-      result.scope = 'user';
     } else if (!arg.startsWith('-')) {
       positionalArgs.push(arg);
     }
@@ -659,7 +629,7 @@ ${colors.bright}╔════════════════════�
     logStep(4, 'Configuring MCP servers');
 
     if (args.configureClaude) {
-      configureClaudeCode(credentials, args.scope);
+      configureClaudeCode(credentials);
     }
 
     if (args.configureCursor) {
