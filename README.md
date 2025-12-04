@@ -4,6 +4,17 @@ A Model Context Protocol (MCP) server that lets AI assistants (Claude Code, Curs
 
 > **Beta Software**: This project is in beta. Use at your own risk. Please report issues on [GitHub](https://github.com/swiftcomza/feedbucket-mcp/issues).
 
+## Prerequisites
+
+Before installing this MCP server, make sure you have:
+
+1. A [Feedbucket](https://feedbucket.app) account
+2. Feedbucket installed on your website
+3. Protected mode enabled (recommended):
+   - Go to [Widget Settings](https://dashboard.feedbucket.app/projects/YOUR_PROJECT_ID/settings/widget)
+   - Set "Trigger Feedbucket using a query string" to **Yes**
+   - Save settings and copy your secret key
+
 ## Quick Start
 
 ### 1. Install from npm
@@ -239,19 +250,6 @@ Add to `.cursor/mcp.json` in your project root:
 | `FEEDBUCKET_API_KEY` | No* | API key for protected projects (`feedbucketKey` from URL) |
 
 *Required if your project uses query string protection.
-
----
-
-## Finding Your feedbucketKey
-
-For protected projects, your `feedbucketKey` is the secret you set in Feedbucket's "Trigger by query string" setting.
-
-1. Go to [Widget Settings](https://dashboard.feedbucket.app/projects/YOUR_PROJECT_ID/settings/widget) in your Feedbucket Dashboard
-2. Set "Trigger Feedbucket using a query string" to **Yes**
-3. Save settings and copy your secret key
-4. Pass it as the second argument: `npm run setup -- https://yoursite.com YOUR_SECRET`
-
-The setup script automatically extracts the project ID from your website and fetches the private key from the API.
 
 ---
 
