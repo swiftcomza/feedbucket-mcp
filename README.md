@@ -2,15 +2,17 @@
 
 A Model Context Protocol (MCP) server that lets AI assistants (Claude Code, Cursor) manage website feedback from [Feedbucket](https://feedbucket.app).
 
+> **Beta Software**: This project is in beta. Use at your own risk. Please report issues on [GitHub](https://github.com/swiftcomza/feedbucket-mcp/issues).
+
 ## Quick Start
 
-### Option 1: Install from npm (recommended)
+### 1. Install from npm
 
 ```bash
 npm install -g feedbucket-mcp
 ```
 
-Then run setup:
+### 2. Run the setup wizard
 
 ```bash
 # For protected projects:
@@ -20,7 +22,27 @@ feedbucket-setup https://your-website.com YOUR_FEEDBUCKET_SECRET
 feedbucket-setup https://your-website.com
 ```
 
-### Option 2: Clone from GitHub
+The setup script automatically:
+- Extracts the project ID from your website HTML
+- Fetches the private key from Feedbucket API
+- Configures Claude Code and Cursor
+
+### 3. Restart your IDE
+
+Restart Claude Code or Cursor to load the new MCP server.
+
+### 4. Start using it
+
+Ask your AI assistant:
+- "Show me unresolved feedback from Feedbucket"
+- "What's the feedback summary for this project?"
+- "Add a comment to feedback #12345 saying we've fixed this"
+
+---
+
+## Alternative: Clone from GitHub
+
+If you prefer to clone the repository:
 
 ```bash
 git clone https://github.com/swiftcomza/feedbucket-mcp.git
@@ -28,22 +50,6 @@ cd feedbucket-mcp
 npm install && npm run build
 npm run setup -- https://your-website.com YOUR_FEEDBUCKET_SECRET
 ```
-
-The setup script automatically:
-- Extracts the project ID from your website HTML
-- Fetches the private key from Feedbucket API
-- Configures Claude Code and Cursor
-
-### Restart your IDE
-
-Restart Claude Code or Cursor to load the new MCP server.
-
-### Start using it
-
-Ask your AI assistant:
-- "Show me unresolved feedback from Feedbucket"
-- "What's the feedback summary for this project?"
-- "Add a comment to feedback #12345 saying we've fixed this"
 
 ---
 
