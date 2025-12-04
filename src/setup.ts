@@ -387,6 +387,51 @@ function ensureBuilt(): boolean {
   return true;
 }
 
+function updateGitignore(): void {
+  const gitignorePath = join(process.cwd(), '.gitignore');
+  const entriesToAdd = ['.mcp.json', '.cursor/'];
+  const addedEntries: string[] = [];
+
+  let content = '';
+  if (existsSync(gitignorePath)) {
+    content = readFileSync(gitignorePath, 'utf-8');
+  }
+
+  const lines = content.split('\n').map(line => line.trim());
+
+  for (const entry of entriesToAdd) {
+    // Check if entry already exists (exact match or with trailing comment)
+    const alreadyIgnored = lines.some(line =>
+      line === entry ||
+      line.startsWith(entry + ' ') ||
+      line === entry.replace('/', '')
+    );
+
+    if (!alreadyIgnored) {
+      addedEntries.push(entry);
+    }
+  }
+
+  if (addedEntries.length > 0) {
+    // Add a newline if file doesn't end with one
+    if (content.length > 0 && !content.endsWith('\n')) {
+      content += '\n';
+    }
+
+    // Add comment and entries
+    if (content.length > 0) {
+      content += '\n';
+    }
+    content += '# MCP config files (contain credentials)\n';
+    content += addedEntries.join('\n') + '\n';
+
+    writeFileSync(gitignorePath, content);
+    logSuccess(`Added to .gitignore: ${addedEntries.join(', ')}`);
+  } else {
+    log('  .gitignore already configured');
+  }
+}
+
 interface ParsedArgs {
   websiteUrl?: string;
   feedbucketSecret?: string;
@@ -620,6 +665,10 @@ ${colors.bright}╔════════════════════�
     if (args.configureCursor) {
       configureCursor(credentials);
     }
+
+    // Step 5: Update .gitignore
+    logStep(5, 'Updating .gitignore');
+    updateGitignore();
 
     // Done!
     console.log(`
