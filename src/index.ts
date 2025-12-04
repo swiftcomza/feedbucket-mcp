@@ -50,7 +50,7 @@ try {
 const tools: Tool[] = [
   {
     name: 'feedback_list',
-    description: 'Fetch all feedback items from the Feedbucket project with intelligent filtering for AI consumption. Automatically optimizes data to prevent overwhelming responses.',
+    description: 'Fetch all feedback items from the Feedbucket project with intelligent filtering for AI consumption. Automatically optimizes data to prevent overwhelming responses. Each feedback item may include a screenshot URL in the "resource" field - use feedback_get to retrieve full details and view the screenshot for visual context.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -139,7 +139,7 @@ const tools: Tool[] = [
   },
   {
     name: 'feedback_get',
-    description: 'Get full details of a specific feedback item including all comments, attachments, and session data',
+    description: 'Get full details of a specific feedback item including all comments, attachments, and session data. IMPORTANT: For screenshot feedback, the response includes a "resource" field with the screenshot URL. You should download this image to a temporary file and view it to see the visual context including the green dot showing where the user clicked. The screenshot provides crucial context for understanding the feedback.',
     inputSchema: {
       type: 'object',
       properties: {

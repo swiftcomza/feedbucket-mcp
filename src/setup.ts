@@ -263,6 +263,7 @@ function getCursorConfigPath(): string {
 }
 
 interface McpServerConfig {
+  type?: 'stdio' | 'http' | 'sse';
   command: string;
   args?: string[];
   env?: Record<string, string>;
@@ -299,8 +300,9 @@ function configureClaudeCode(credentials: FeedbucketCredentials, scope: 'project
   // Create a safe server name from project name
   const serverName = `feedbucket-${credentials.projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}`;
 
-  // Build the MCP server config
+  // Build the MCP server config for Claude Code (requires type: stdio)
   const serverConfig: McpServerConfig = {
+    type: 'stdio',
     command: 'node',
     args: [join(projectRoot, 'dist', 'index.js')],
     env: {
