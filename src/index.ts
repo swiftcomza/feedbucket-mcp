@@ -343,6 +343,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 tags: feedback.tags,
                 created_at: feedback.created_at,
                 resolved_at: feedback.resolved_at,
+                selector: feedback.session_data.selector ? {
+                  path: feedback.session_data.selector.path,
+                  pathWithClass: feedback.session_data.selector.pathWithClass,
+                  offset: feedback.session_data.selector.offset,
+                  scrollableSelector: feedback.session_data.selector.scrollableSelector
+                } : null,
                 comments: feedback.comments.map(c => ({
                   id: c.id,
                   body: c.body,
