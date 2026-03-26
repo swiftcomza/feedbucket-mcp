@@ -132,6 +132,14 @@ const tools: Tool[] = [
         feedback_id: {
           type: 'number',
           description: 'The feedback ID to mark as resolved'
+        },
+        reporter_name: {
+          type: 'string',
+          description: 'Name of the person resolving (optional, defaults to "Claude AI Assistant")'
+        },
+        reporter_email: {
+          type: 'string',
+          description: 'Email of the person resolving (optional, defaults to "claude@anthropic.com")'
         }
       },
       required: ['feedback_id']
@@ -288,8 +296,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         
         const feedbackId = args.feedback_id as number;
-        
-        const result = await api.resolveFeedback(feedbackId);
+        const reporterName = args?.reporter_name as string | undefined;
+        const reporterEmail = args?.reporter_email as string | undefined;
+
+        const result = await api.resolveFeedback(feedbackId, reporterName, reporterEmail);
         
         return {
           content: [

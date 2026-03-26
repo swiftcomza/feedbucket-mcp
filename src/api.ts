@@ -232,7 +232,7 @@ export class FeedbucketApi {
     const endpoint = `/feedback/${feedbackId}/comments?key=${this.config.privateKey}`;
     const payload = {
       body,
-      resolve,
+      resolve: resolve ? 'true' : 'false',
       reporter: {
         name: reporterName || 'Claude AI Assistant',
         email: reporterEmail || 'claude@anthropic.com'
@@ -247,12 +247,17 @@ export class FeedbucketApi {
     });
   }
   
-  async resolveFeedback(feedbackId: number): Promise<ResolveResponse> {
+  async resolveFeedback(feedbackId: number, reporterName?: string, reporterEmail?: string): Promise<ResolveResponse> {
     const endpoint = `/feedback/${feedbackId}/resolve?key=${this.config.privateKey}`;
-    
+
     return this.makeRequest<ResolveResponse>(endpoint, {
       method: 'PUT',
-      body: JSON.stringify({})
+      body: JSON.stringify({
+        reporter: {
+          name: reporterName || 'Claude AI Assistant',
+          email: reporterEmail || 'claude@anthropic.com'
+        }
+      })
     });
   }
   
