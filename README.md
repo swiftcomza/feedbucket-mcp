@@ -1,5 +1,8 @@
 # Feedbucket MCP Server
 
+> [!IMPORTANT]
+> **Deprecated: use the official Feedbucket MCP server.** Feedbucket now has its own MCP server: see [feedbucket.app/features/mcp](https://feedbucket.app/features/mcp). This repository was an unofficial, community-built server and is no longer maintained. Thanks to everyone who used it.
+
 A Model Context Protocol (MCP) server that lets AI assistants (Claude Code, Cursor) manage website feedback from [Feedbucket](https://feedbucket.app).
 
 > **Beta Software**: This project is in beta. Use at your own risk. Please report issues on [GitHub](https://github.com/swiftcomza/feedbucket-mcp/issues).
